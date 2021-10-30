@@ -1,0 +1,22 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t sarim24/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run sarim24/react-test npm test -- --coverage
+
+after_success:
+  - docker build -t sarim24/multi-client ./client
+  - docker build -t sarim24/multi-nginx ./nginx
+  - docker build -t sarim24/multi-server ./server
+  - docker build -t sarim24/multi-worker ./worker
+
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push sarim24/multi-client
+  - docker push sarim24/multi-nginx
+  - docker push sarim24/multi-server
+  - docker push sarim24/multi-worker
+  
